@@ -13,6 +13,10 @@ dist-ssr
 *.local
 /src-tauri/target/
 /scratch_rust/target/
+/scratch/
+/scratch_rust/
+/test_toast*.ps1
+dev_log.txt
 .env
 .env.*
 !.env.example

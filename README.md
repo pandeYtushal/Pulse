@@ -12,11 +12,17 @@ Pulse also reads Windows camera and microphone usage state to display an indicat
 
 ## Screenshots
 
-*Screenshots coming soon.*
+No product screenshots are included yet. The website will use real application captures when they are available.
 
 ## Installation
 
-Currently, Pulse must be built from source. Once a stable release is available, you will be able to download the Windows installer from the GitHub Releases page, run it, and complete Pulse's first-run setup. Pulse then appears at the top of the screen. The optional **Start Pulse with Windows** setting is available in Settings.
+### For Windows users
+
+There is not yet a published installer. When the first release is available, download `Pulse-Setup.exe` from [GitHub Releases](https://github.com/pandeYtushal/Pulse/releases), run it, and complete Pulse's first-run setup. Pulse then appears at the top of the screen. The optional **Start Pulse with Windows** setting is available in Settings.
+
+### For developers
+
+See [Development](#development) for prerequisites and source-build instructions. Normal users do not need Node.js, Rust, or a terminal once a public installer is available.
 
 ## Features
 
@@ -41,7 +47,7 @@ Features depend on Windows permissions, available APIs, device support, and (for
 
 ### Requirements
 
-- Windows 10 or 11
+- A Windows PC (the minimum supported Windows release has not yet been formally verified)
 - Node.js 22 or newer
 - Rust stable with the MSVC Windows target and Visual Studio C++ Build Tools
 - WebView2 Runtime
@@ -86,7 +92,7 @@ Windows APIs → Rust services → Tauri events → React providers and activity
 
 ## Website
 
-The static landing page is in [`website/`](website/).
+The static landing page is in [`website/`](website/). The Download button currently links to the verified GitHub Releases page and clearly reports that no installer has been published. The release workflow creates the stable `Pulse-Setup.exe` asset for future tagged releases.
 
 ## Contributing and security
 

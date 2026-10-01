@@ -1,15 +1,15 @@
 # Preparing a Pulse release
 
-The repository does not yet have a verified GitHub URL or a published release. The CI workflow builds and tests the Windows NSIS installer and stores it as a temporary workflow artifact. It does not create a release or publish the installer.
+The public repository is [pandeYtushal/Pulse](https://github.com/pandeYtushal/Pulse). Its Releases page currently has no published releases. The ordinary CI workflow builds and tests the Windows NSIS installer as a temporary artifact. The tagged release workflow publishes a release only after a maintainer pushes a matching version tag.
 
 ## Release checklist
 
-1. Confirm the real GitHub repository is configured and Actions are enabled.
-2. Review the pending changes and update `CHANGELOG.md`.
-3. Set the same version in `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, and `src-tauri/tauri.conf.json`.
-4. Run the checks in `CONTRIBUTING.md` and `npm run build:windows` on Windows.
-5. Create and push a matching version tag (for example, `v0.1.0`) only after maintainers approve that release number.
-6. Review the Windows CI artifact. For the first public release, create a GitHub Release manually, attach the tested NSIS installer, and publish reviewed release notes.
-7. Configure `WINDOWS_DOWNLOAD_URL` in `website/config.js` to the exact HTTPS release asset URL, then deploy the website using the manual Pages workflow after enabling GitHub Pages with the Actions source.
+1. Review the changes and update `CHANGELOG.md` for the release.
+2. Ensure the same semantic version is set in `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, and `src-tauri/tauri.conf.json`.
+3. Run the checks in `CONTRIBUTING.md` and `npm run build:windows` on Windows.
+4. Confirm the local NSIS output is named `Pulse_<version>_x64-setup.exe` and test that installer.
+5. Push a matching version tag such as `v0.1.0` only after approving that release number. The tagged release workflow verifies the version, builds the installer, and attaches `Pulse-Setup.exe` plus its SHA-256 checksum to the GitHub Release.
+6. After GitHub shows the release asset, set `WINDOWS_RELEASE_AVAILABLE` to `true` and `WINDOWS_DOWNLOAD_URL` in `website/config.js` to `https://github.com/pandeYtushal/Pulse/releases/latest/download/Pulse-Setup.exe`.
+7. Deploy the site using the manual Pages workflow after enabling GitHub Pages with the Actions source.
 
-The repository has no code-signing certificate or secret configured. This workflow does not sign binaries, publish GitHub Releases automatically, or create update-signing keys. Decide on signing and distribution requirements before advertising the installer as a production download. No signing secret is required for the current CI-only artifact build.
+The application is currently unsigned: Windows reports the built executable as not digitally signed. No code-signing certificate or secret is configured. The release workflow does not sign binaries or create update-signing keys. Configure signing with securely stored secrets before broad public distribution; never commit certificates or private keys.

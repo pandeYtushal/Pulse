@@ -4,13 +4,13 @@ Thanks for taking the time to improve Pulse. Contributions should preserve the c
 
 ## Before you start
 
-- Check existing issues and discussions once the repository URL is published.
+- Check existing [issues](https://github.com/pandeYtushal/Pulse/issues) before starting work.
 - For larger changes, describe the problem and intended approach before opening a pull request.
 - Do not include real notification text, clipboard contents, private screenshots, credentials, or personal data in issues, logs, or test fixtures.
 
 ## Local development
 
-Use Windows 10 or 11 with Node.js 22+, Rust stable/MSVC, WebView2, and the Visual Studio C++ build tools.
+Use a Windows PC with Node.js 22+, Rust stable/MSVC, WebView2, and the Visual Studio C++ build tools. The minimum supported Windows release has not yet been formally verified.
 
 ```powershell
 npm install

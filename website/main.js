@@ -1,19 +1,21 @@
 (() => {
 const {
   WINDOWS_DOWNLOAD_URL = null,
+  WINDOWS_RELEASE_AVAILABLE = false,
   GITHUB_URL = null,
-  CHROME_WEB_STORE_URL = null,
 } = window.PULSE_SITE_URLS || {};
 
 const destinations = {
   download: WINDOWS_DOWNLOAD_URL,
   github: GITHUB_URL,
-  chrome: CHROME_WEB_STORE_URL,
 };
+
+const isDestinationAllowed = (url) =>
+  typeof url === 'string' && /^https:\/\//i.test(url);
 
 for (const link of document.querySelectorAll('[data-destination]')) {
   const url = destinations[link.dataset.destination];
-  if (typeof url === 'string' && /^https:\/\//i.test(url)) {
+  if (isDestinationAllowed(url)) {
     link.href = url;
     link.removeAttribute('aria-disabled');
     link.classList.remove('is-disabled');
@@ -28,11 +30,11 @@ for (const link of document.querySelectorAll('[data-destination]')) {
 if (GITHUB_URL) {
   document.getElementById('repository-status').textContent = 'Source, issues and contribution notes.';
 }
-if (WINDOWS_DOWNLOAD_URL) {
-  document.getElementById('release-status').textContent = 'A Windows release is available.';
+if (WINDOWS_RELEASE_AVAILABLE) {
+  document.getElementById('release-status').textContent = 'The Windows installer is available.';
   document.getElementById('download-status').textContent = 'Windows installer available';
-}
-if (CHROME_WEB_STORE_URL) {
-  document.getElementById('extension-status').textContent = 'Published in the Chrome Web Store';
+} else {
+  document.getElementById('release-status').textContent = 'The Windows installer will be available with the first public release.';
+  document.getElementById('download-status').textContent = 'No public installer release yet';
 }
 })();

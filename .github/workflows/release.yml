@@ -1,0 +1,87 @@
+name: Publish Windows release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify tag matches application version
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $expectedTag = "v$version"
+          if ($env:GITHUB_REF_NAME -ne $expectedTag) {
+            throw "Tag $env:GITHUB_REF_NAME does not match package version $version (expected $expectedTag)."
+          }
+          $packageLock = Get-Content package-lock.json -Raw | ConvertFrom-Json
+          $tauri = Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
+          $cargo = Get-Content src-tauri/Cargo.toml -Raw
+          $cargoLock = Get-Content src-tauri/Cargo.lock -Raw
+          $cargoPackage = [regex]::Match($cargoLock, '(?ms)\[\[package\]\]\r?\nname = "pulse"\r?\nversion = "([^"]+)"')
+          $tomlPackage = [regex]::Match($cargo, '(?m)^version\s*=\s*"([^"]+)"')
+          if ($packageLock.version -ne $version -or $tauri.version -ne $version -or
+              -not $tomlPackage.Success -or $tomlPackage.Groups[1].Value -ne $version -or
+              -not $cargoPackage.Success -or $cargoPackage.Groups[1].Value -ne $version) {
+            throw "package.json, package-lock.json, tauri.conf.json, Cargo.toml, and Cargo.lock versions must match."
+          }
+
+      - name: Typecheck frontend
+        run: npm run typecheck
+
+      - name: Run frontend tests
+        run: npm test
+
+      - name: Check Rust
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
+      - name: Test Rust
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Build Windows installer
+        run: npm run build:windows
+
+      - name: Prepare release assets
+        shell: pwsh
+        run: |
+          $matches = @(Get-ChildItem src-tauri/target/release/bundle/nsis -Filter 'Pulse_*_x64-setup.exe' -File)
+          if ($matches.Count -ne 1) {
+            throw "Expected exactly one Pulse NSIS installer, found $($matches.Count)."
+          }
+          $releaseDir = Join-Path $env:RUNNER_TEMP 'pulse-release-assets'
+          New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+          $installer = Join-Path $releaseDir 'Pulse-Setup.exe'
+          Copy-Item -LiteralPath $matches[0].FullName -Destination $installer
+          $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -LiteralPath (Join-Path $releaseDir 'Pulse-Setup.exe.sha256') -Value "$hash  Pulse-Setup.exe" -Encoding ascii
+          "RELEASE_ASSET_DIR=$releaseDir" >> $env:GITHUB_ENV
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          gh release create $env:GITHUB_REF_NAME `
+            (Join-Path $env:RELEASE_ASSET_DIR 'Pulse-Setup.exe') `
+            (Join-Path $env:RELEASE_ASSET_DIR 'Pulse-Setup.exe.sha256') `
+            --verify-tag `
+            --title "Pulse $env:GITHUB_REF_NAME" `
+            --generate-notes
