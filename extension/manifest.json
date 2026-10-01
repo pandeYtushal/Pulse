@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Pulse Download Bridge",
+  "version": "1.0",
+  "description": "Bridges browser download events to Pulse.",
+  "permissions": [
+    "downloads"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:40523/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+name: Windows CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Validate landing-page JavaScript
+        run: node --check website/main.js
+
+      - name: Typecheck frontend
+        run: npm run typecheck
+
+      - name: Run frontend lifecycle tests
+        run: npm test
+
+      - name: Check Rust
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
+      - name: Test Rust
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Build Windows installer
+        run: npm run build:windows
+
+      - name: Upload installer for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-windows-installer-${{ github.run_number }}
+          path: src-tauri/target/release/bundle/nsis/Pulse_*_x64-setup.exe
+          if-no-files-found: error
+          retention-days: 14

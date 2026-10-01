@@ -1,0 +1,14 @@
+.flow-step h3 { margin-top: 25px; }
+.flow-arrow { margin-top: 28px; }
+.extension-status .text-link { display: inline-block; margin-top: 10px; font-size: 10px; }
+.privacy-title { margin: 24px 0 18px; font: 500 clamp(42px, 7vw, 68px)/1.06 "Segoe UI", sans-serif; letter-spacing: -.065em; }
+.privacy-lead { max-width: 590px; margin-bottom: 48px; color: #a7a9a2; font-size: 14px; line-height: 1.75; }
+.privacy-document { max-width: 720px; margin: 0 0 34px; }
+.privacy-document h2 { margin: 34px 0 10px; font-size: 18px; }
+.privacy-document p { color: #a7a9a2; font-size: 12px; line-height: 1.8; }
+@media (max-width: 720px) {
+  .flow-step { grid-template-columns: 48px 1fr; grid-template-rows: 24px auto; }
+  .step-index { grid-row: 1 / span 2; }
+  .flow-step h3 { margin: 0; align-self: end; }
+  .flow-step p { margin: 4px 0 0; align-self: start; }
+}

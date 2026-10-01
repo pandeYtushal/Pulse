@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+  IgnorableNamespaces="uap uap3 rescap uap10">
+
+  <Identity
+    Name="Pulse.Development"
+    Publisher="CN=Pulse"
+    Version="1.0.0.0" />
+
+  <Properties>
+    <DisplayName>Pulse Dev</DisplayName>
+    <PublisherDisplayName>Pulse</PublisherDisplayName>
+    <Logo>icons\32x32.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.22621.0" />
+  </Dependencies>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <uap3:Capability Name="userNotificationListener" />
+  </Capabilities>
+
+  <Applications>
+    <Application Id="Pulse" Executable="target\debug\tauri-app.exe" uap10:TrustLevel="mediumIL" uap10:RuntimeBehavior="win32App">
+      <uap:VisualElements
+        DisplayName="Pulse Dev"
+        Description="Pulse Development"
+        BackgroundColor="transparent"
+        Square150x150Logo="icons\128x128.png"
+        Square44x44Logo="icons\32x32.png" />
+    </Application>
+  </Applications>
+</Package>
