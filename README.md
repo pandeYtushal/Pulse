@@ -18,7 +18,7 @@ No product screenshots are included yet. The website will use real application c
 
 ### For Windows users
 
-Download the Windows installer from the [Pulse v1.0.0 release](https://github.com/pandeYtushal/Pulse/releases/tag/v1.0.0), run it, and complete Pulse's first-run setup. Pulse then appears at the top of the screen. The optional **Start Pulse with Windows** setting is available in Settings.
+Download the latest Windows installer from [GitHub Releases](https://github.com/pandeYtushal/Pulse/releases/latest), run it, and complete Pulse's first-run setup. Pulse then appears at the top of the screen. The optional **Start Pulse with Windows** setting is available in Settings.
 
 ### For developers
 
@@ -92,11 +92,11 @@ Windows APIs → Rust services → Tauri events → React providers and activity
 
 ## Website
 
-The static landing page is in [`website/`](website/). Its Download button links to the verified v1.0.0 Windows installer. Future tagged releases publish the stable `Pulse-Setup.exe` asset.
+The static landing page is in [`website/`](website/). Its Download button links directly to the latest `Pulse-Setup.exe` Windows installer.
 
 ## Contributing and security
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks, [SECURITY.md](SECURITY.md) for responsible vulnerability reporting, and [RELEASING.md](RELEASING.md) for the manual release checklist. The Windows CI workflow builds and tests the application and uploads an installer artifact; it does not publish a GitHub Release automatically.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks, [SECURITY.md](SECURITY.md) for responsible vulnerability reporting, and [RELEASING.md](RELEASING.md) for the release checklist. Windows CI validates main-branch changes; the tagged release workflow publishes GitHub Releases.
 
 ## License
 
@@ -104,4 +104,4 @@ No license file is present. Until the maintainers add one, the repository has no
 
 ## Version
 
-The application metadata identifies the current development version as `1.0.1`. The published `v1.0.0` installer was built from application version `0.1.0`; subsequent releases use matching version tags and application metadata.
+The current application version is `1.0.1`. The earlier `v1.0.0` release contained an installer labeled `0.1.0`; the `v1.0.1` release aligns the tag and installer versions.

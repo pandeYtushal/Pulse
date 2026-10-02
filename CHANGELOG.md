@@ -1,16 +1,17 @@
 # Changelog
 
-Changes for each release will be documented here. Version 1.0.0 is published; its Windows installer is named `Pulse_0.1.0_x64-setup.exe`.
+Changes for each release will be documented here. Version 1.0.0 was published with application metadata 0.1.0; version 1.0.1 corrects the version mismatch.
 
-## [1.0.1] - Unreleased
+## [1.0.1] - 2026-10-02
 
 ### Fixed
 
+- Made the production window visible from startup so a delayed frontend IPC call cannot leave Pulse hidden.
 - Removed scale-based zoom from music hover controls; replaced it with a subtle fade and slide.
 
 ### Changed
 
-- Website download now targets the published Windows installer directly.
+- Website download follows the latest published `Pulse-Setup.exe` installer.
 - GitHub Pages deploys automatically when changes reach `main`.
 
 ## [Unreleased]

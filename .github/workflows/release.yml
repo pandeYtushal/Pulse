@@ -32,7 +32,7 @@ jobs:
           if ($env:GITHUB_REF_NAME -ne $expectedTag) {
             throw "Tag $env:GITHUB_REF_NAME does not match package version $version (expected $expectedTag)."
           }
-          $packageLock = Get-Content package-lock.json -Raw | ConvertFrom-Json
+          $packageLock = Get-Content package-lock.json -Raw | ConvertFrom-Json -AsHashtable
           $tauri = Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
           $cargo = Get-Content src-tauri/Cargo.toml -Raw
           $cargoLock = Get-Content src-tauri/Cargo.lock -Raw
