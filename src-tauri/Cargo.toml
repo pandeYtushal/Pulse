@@ -1,6 +1,6 @@
 [package]
 name = "pulse"
-version = "0.1.0"
+version = "1.0.1"
 description = "A quiet system layer for Windows, bringing media, notifications, and system activity into one compact surface."
 edition = "2021"
 

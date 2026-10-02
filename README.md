@@ -18,7 +18,7 @@ No product screenshots are included yet. The website will use real application c
 
 ### For Windows users
 
-There is not yet a published installer. When the first release is available, download `Pulse-Setup.exe` from [GitHub Releases](https://github.com/pandeYtushal/Pulse/releases), run it, and complete Pulse's first-run setup. Pulse then appears at the top of the screen. The optional **Start Pulse with Windows** setting is available in Settings.
+Download the Windows installer from the [Pulse v1.0.0 release](https://github.com/pandeYtushal/Pulse/releases/tag/v1.0.0), run it, and complete Pulse's first-run setup. Pulse then appears at the top of the screen. The optional **Start Pulse with Windows** setting is available in Settings.
 
 ### For developers
 
@@ -92,7 +92,7 @@ Windows APIs → Rust services → Tauri events → React providers and activity
 
 ## Website
 
-The static landing page is in [`website/`](website/). The Download button currently links to the verified GitHub Releases page and clearly reports that no installer has been published. The release workflow creates the stable `Pulse-Setup.exe` asset for future tagged releases.
+The static landing page is in [`website/`](website/). Its Download button links to the verified v1.0.0 Windows installer. Future tagged releases publish the stable `Pulse-Setup.exe` asset.
 
 ## Contributing and security
 
@@ -104,4 +104,4 @@ No license file is present. Until the maintainers add one, the repository has no
 
 ## Version
 
-The application metadata currently identifies this build as `0.1.0`. No tagged or published release has been verified.
+The application metadata identifies the current development version as `1.0.1`. The published `v1.0.0` installer was built from application version `0.1.0`; subsequent releases use matching version tags and application metadata.

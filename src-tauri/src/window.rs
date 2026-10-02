@@ -137,8 +137,9 @@ pub fn setup_window(app: &AppHandle) {
         let _ = window.set_always_on_top(true);
         let _ = window.set_skip_taskbar(true);
 
-        // Keep the transparent webview hidden until the frontend has hydrated and
-        // painted its first real surface. App startup calls show_pulse_window then.
+        // The native window starts visible so production cannot remain hidden if
+        // frontend hydration or its first IPC call is delayed. The transparent
+        // frontend still gates Pulse content until persisted settings are ready.
         position_pulse(&window);
 
         // Spawn hit-testing tracker

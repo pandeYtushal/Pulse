@@ -1,6 +1,17 @@
 # Changelog
 
-Changes for each release will be documented here. The public Releases page currently has no published releases.
+Changes for each release will be documented here. Version 1.0.0 is published; its Windows installer is named `Pulse_0.1.0_x64-setup.exe`.
+
+## [1.0.1] - Unreleased
+
+### Fixed
+
+- Removed scale-based zoom from music hover controls; replaced it with a subtle fade and slide.
+
+### Changed
+
+- Website download now targets the published Windows installer directly.
+- GitHub Pages deploys automatically when changes reach `main`.
 
 ## [Unreleased]
 

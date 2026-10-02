@@ -62,8 +62,6 @@ export function MusicContent({ media, mode, isHovered = false }: MusicContentPro
             aria-label="Open Pulse settings"
             title="Settings"
             onClick={(e) => { e.stopPropagation(); setMode('settings'); }}
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.94 }}
             className="absolute right-4 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white/85"
           >
             <Settings size={15} aria-hidden="true" />
@@ -78,7 +76,7 @@ export function MusicContent({ media, mode, isHovered = false }: MusicContentPro
                 <TrackInfo title={media.title || ""} artist={media.artist || ""} expanded={false} />
               </motion.div>
             ) : (
-              <motion.div key="hover-controls" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ type: "spring", stiffness: 520, damping: 38, mass: 0.5 }} layout className="flex flex-1 min-w-0 items-center justify-center gap-2 h-full">
+              <motion.div key="hover-controls" initial={{ opacity: 0, x: 3 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -3 }} transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }} layout className="flex flex-1 min-w-0 items-center justify-center gap-2 h-full">
                 <motion.button
                   type="button"
                   aria-label="Previous track"
@@ -89,7 +87,6 @@ export function MusicContent({ media, mode, isHovered = false }: MusicContentPro
                   <SkipBack size={15} aria-hidden="true" />
                 </motion.button>
                 <motion.button
-                  whileTap={{ scale: 0.92 }}
                   type="button"
                   aria-label={media.playback_status === "Playing" ? "Pause playback" : "Start playback"}
                   aria-pressed={media.playback_status === "Playing"}
@@ -162,9 +159,9 @@ export function MusicContent({ media, mode, isHovered = false }: MusicContentPro
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 3 }}
             transition={{ duration: pulseMotion.timing.normal, ease: pulseMotion.contentTransition.ease }}
             className="flex flex-col w-full gap-2 mt-auto"
           >

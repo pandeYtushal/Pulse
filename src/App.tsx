@@ -46,6 +46,13 @@ function App() {
     if (!isLoaded) return;
     let cancelled = false;
     const showAfterHydration = async () => {
+      // Reveal the hydrated surface independently of the native show IPC. The
+      // native window is visible from creation, so a transient invoke failure
+      // must not leave the transparent Pulse shell collapsed forever.
+      if (!cancelled) {
+        setWindowShown(true);
+        setRevealToken(token => token + 1);
+      }
       try {
         await invoke('set_top_offset_command', { topOffset }).catch((error) => {
           console.warn('[Pulse Startup] Could not apply top offset:', error);
@@ -56,10 +63,6 @@ function App() {
           console.warn('[Pulse Startup] Could not prepare the hit region:', error);
         });
         await invoke('show_pulse_window');
-        if (!cancelled) {
-          setWindowShown(true);
-          setRevealToken(token => token + 1);
-        }
       } catch (error) {
         console.error('[Pulse Startup] Could not show the main window:', error);
       }
