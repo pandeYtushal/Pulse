@@ -12,3 +12,86 @@
   .flow-step h3 { margin: 0; align-self: end; }
   .flow-step p { margin: 4px 0 0; align-self: start; }
 }
+
+/* Readable type scale: the original visual system used tiny editorial labels
+   for nearly all body copy. Keep the quiet style while making real text easy
+   to read at normal desktop and laptop distances. */
+html { font-size: 16px; }
+body { font-size: 16px; line-height: 1.65; }
+.wordmark { font-size: 19px; }
+.topbar nav a, .nav-cta { font-size: 14px; }
+.nav-cta { padding: 10px 15px; }
+.eyebrow, .column-index { font-size: 12px; }
+.hero-copy { max-width: 520px; font-size: 18px; line-height: 1.72; }
+.button { min-height: 50px; padding-inline: 19px; font-size: 14px; }
+.hero-status { font-size: 13px; }
+.hero-rule { gap: 20px; font-size: 11px; }
+.visual-window-top i { font-size: 10px; }
+.visual-screen { min-height: 390px; }
+.visual-pulse { min-width: 140px; height: 42px; font-size: 14px; }
+.visual-live { font-size: 10px; }
+.visual-copy > span { font-size: 11px; }
+.visual-copy b { font-size: clamp(36px, 4.2vw, 50px); }
+.visual-capabilities span, .hero-visual figcaption { font-size: 11px; }
+.section-heading > p, .developer-heading > p { max-width: 410px; font-size: 16px; }
+.step-index, .browser-step .step-index { font-size: 12px; }
+.flow-step h3 { font-size: 18px; }
+.flow-step p, .capture-note { font-size: 14px; }
+.feature-column { padding: 30px; }
+.feature-column h2 { font-size: 30px; }
+.feature-column li { min-height: 52px; font-size: 15px; }
+.feature-column li > span, .feature-column small { font-size: 12px; }
+.privacy-strip h2 { font-size: 28px; }
+.privacy-strip p { font-size: 15px; }
+.privacy-strip > a, .text-link { font-size: 14px; }
+.browser-step { min-height: 340px; padding: 24px; }
+.browser-step h3 { font-size: 22px; }
+.browser-step p, .browser-help { font-size: 14px; line-height: 1.75; }
+.download h2 { font-size: 52px; }
+.download-copy > p { font-size: 15px; }
+.download-meta, .extension-status, .extension-status .text-link { font-size: 13px; }
+.install li { grid-template-columns: 42px 1fr; gap: 12px; padding-block: 16px; font-size: 15px; }
+.install li span { font-size: 12px; }
+.developer-grid article > span { font-size: 10px; }
+.developer-grid p, .developer-grid code { font-size: 13px; }
+.developer-grid .text-link, .footer { font-size: 13px; }
+.privacy-title { font-size: clamp(42px, 7vw, 68px); }
+.privacy-lead { font-size: 16px; }
+.privacy-document h2 { font-size: 21px; }
+.privacy-document p { font-size: 15px; }
+
+@media (max-width: 900px) {
+  .topbar nav a { font-size: 13px; }
+  .shell { width: min(var(--shell), calc(100% - 56px)); }
+  .browser-step { padding: 20px; }
+}
+
+@media (max-width: 720px) {
+  body { font-size: 16px; }
+  .topbar { height: 66px; }
+  .nav-cta { padding: 9px 12px; font-size: 13px; }
+  .hero { padding-top: 70px; }
+  .hero h1 { font-size: clamp(46px, 12vw, 70px); }
+  .hero-copy { font-size: 17px; }
+  .hero-rule { gap: 11px; font-size: 10px; }
+  .visual-screen { min-height: 320px; }
+  .visual-copy b { font-size: clamp(36px, 9vw, 48px); }
+  .section-heading > p, .developer-heading > p { font-size: 15px; }
+  .flow-step p, .capture-note { font-size: 14px; }
+  .feature-column li { font-size: 14px; }
+  .privacy-strip h2 { font-size: 24px; }
+  .privacy-strip p, .browser-step p, .browser-help { font-size: 14px; }
+  .browser-step { padding: 21px; }
+  .download h2 { font-size: 44px; }
+  .download-copy > p, .install li { font-size: 14px; }
+  .developer-grid p, .developer-grid code { font-size: 12px; }
+  .footer { font-size: 12px; }
+}
+
+@media (max-width: 390px) {
+  .nav-cta { font-size: 13px; }
+  .hero-actions { display: grid; grid-template-columns: 1fr; }
+  .hero-actions .button { min-height: 48px; padding-inline: 14px; font-size: 14px; }
+  .hero-rule { font-size: 9px; }
+  .flow-step { grid-template-columns: 28px 78px 1fr; gap: 0 5px; }
+}
