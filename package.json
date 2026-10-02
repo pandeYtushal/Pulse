@@ -2,7 +2,7 @@
   "name": "pulse",
   "description": "A quiet system layer for Windows, bringing media, notifications, and system activity into one compact surface.",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",

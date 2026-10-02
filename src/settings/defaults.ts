@@ -3,7 +3,7 @@ import type { PulseSettings } from './types';
 export const DEFAULT_SETTINGS: PulseSettings = {
   // General
   startWithWindows: true,
-  topOffset: 0,
+  position: { horizontal: 'center', verticalOffset: 10, display: 'active' },
 
   // Notifications
   notificationsEnabled: true,

@@ -104,4 +104,4 @@ No license file is present. Until the maintainers add one, the repository has no
 
 ## Version
 
-The current application version is `1.0.1`. The earlier `v1.0.0` release contained an installer labeled `0.1.0`; the `v1.0.1` release aligns the tag and installer versions.
+The current application version is `1.0.2`. The earlier `v1.0.0` release contained an installer labeled `0.1.0`; the `v1.0.1` release aligned the tag and installer versions.

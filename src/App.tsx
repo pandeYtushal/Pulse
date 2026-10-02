@@ -10,8 +10,9 @@ function App() {
   const setMode = usePulseStore(state => state.setMode);
   const hasCompletedOnboarding = useSettingsStore(state => state.hasCompletedOnboarding);
   const isLoaded = useSettingsStore(state => state.isLoaded);
-  const topOffset = useSettingsStore(state => state.settings.topOffset);
+  const position = useSettingsStore(state => state.settings.position);
   const startWithWindows = useSettingsStore(state => state.settings.startWithWindows);
+  const horizontalAlignment = position.horizontal === 'left' ? 'justify-start' : position.horizontal === 'right' ? 'justify-end' : 'justify-center';
   const setSetting = useSettingsStore(state => state.setSetting);
   const notificationsEnabled = useSettingsStore(state => state.settings.notificationsEnabled);
   const showNotificationPreview = useSettingsStore(state => state.settings.showNotificationPreview);
@@ -21,8 +22,10 @@ function App() {
   const onboardingVisible = isLoaded && (!hasCompletedOnboarding || showOnboarding);
 
   useEffect(() => {
-    if (isLoaded) invoke('set_top_offset_command', { topOffset }).catch(() => {});
-  }, [isLoaded, topOffset]);
+    if (isLoaded) invoke('set_position_config', { config: position }).catch(error => {
+      console.warn('[Pulse Startup] Could not apply position preferences:', error);
+    });
+  }, [isLoaded, position]);
 
   // Persistent preferences hydrate before the Pulse event pipeline starts. Keep
   // its runtime gates aligned so a restart cannot briefly expose old defaults.
@@ -40,6 +43,16 @@ function App() {
     });
   }, [isLoaded, onboardingVisible]);
 
+  // The transparent native window routes clicks using this region. Keep it in
+  // sync whenever onboarding is opened or closed (including from the tray),
+  // otherwise controls can render outside the active hit area.
+  useEffect(() => {
+    if (!isLoaded || !onboardingVisible) return;
+    invoke('set_hit_region', { width: 800, height: 600 }).catch((error) => {
+      console.warn('[Pulse Startup] Could not update the hit region:', error);
+    });
+  }, [isLoaded, onboardingVisible]);
+
   // The native window stays hidden until persisted state and the first real UI
   // surface are ready. This prevents an empty/unstyled WebView frame at startup.
   useEffect(() => {
@@ -54,13 +67,8 @@ function App() {
         setRevealToken(token => token + 1);
       }
       try {
-        await invoke('set_top_offset_command', { topOffset }).catch((error) => {
-          console.warn('[Pulse Startup] Could not apply top offset:', error);
-        });
-        await invoke('set_hit_region', onboardingVisible
-          ? { width: 800, height: 600 }
-          : { width: 144, height: 56 }).catch((error) => {
-          console.warn('[Pulse Startup] Could not prepare the hit region:', error);
+        await invoke('set_position_config', { config: useSettingsStore.getState().settings.position }).catch((error) => {
+          console.warn('[Pulse Startup] Could not apply position preferences:', error);
         });
         await invoke('show_pulse_window');
       } catch (error) {
@@ -131,14 +139,14 @@ function App() {
 
   if (onboardingVisible) {
     return (
-      <div className="flex justify-center items-start bg-transparent text-white overflow-hidden m-0 p-0">
+      <div className={`flex w-full h-full ${horizontalAlignment} items-start bg-transparent text-white overflow-hidden m-0 p-0`}>
         <OnboardingShell onComplete={() => setShowOnboarding(false)} />
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center items-start bg-transparent text-white overflow-hidden m-0 p-0">
+    <div className={`flex w-full h-full ${horizontalAlignment} items-start bg-transparent text-white overflow-hidden m-0 p-0`}>
       <PulseIsland windowShown={windowShown} revealToken={revealToken} />
     </div>
   );
@@ -150,13 +158,13 @@ function OnboardingShell({ onComplete }: { onComplete: () => void }) {
     <div
       className="relative overflow-hidden text-white"
       style={{
-        width: 340,
-        height: 480,
-        borderRadius: 22,
-        background: 'rgba(14,14,16,0.97)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '0 12px 32px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2)',
-        backdropFilter: 'blur(24px)',
+        width: 'min(440px, calc(100vw - 24px))',
+        height: 'min(570px, calc(100vh - 24px))',
+        borderRadius: 20,
+        background: 'rgba(17,17,19,0.985)',
+        border: '1px solid rgba(255,255,255,0.085)',
+        boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+        backdropFilter: 'blur(12px)',
       }}
     >
       <Onboarding onComplete={onComplete} />

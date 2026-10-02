@@ -51,6 +51,8 @@ export default function PulseIsland({ windowShown, revealToken }: PulseIslandPro
   const privacy = usePulseStore(state => state.privacy);
   const privacyActive = privacy?.microphone_active || privacy?.camera_active;
   const cameraMicEnabled = useSetting('cameraMicIndicator');
+  const position = useSetting('position');
+  const horizontalAlignment = position.horizontal === 'left' ? 'justify-start' : position.horizontal === 'right' ? 'justify-end' : 'justify-center';
 
   const [time, setTime] = useState("");
   const [isHovered, setIsHovered] = useState(false);
@@ -255,7 +257,7 @@ export default function PulseIsland({ windowShown, revealToken }: PulseIslandPro
   };
 
   return (
-    <div className="w-full h-full flex justify-center items-start pt-0 pointer-events-none">
+    <div className={`w-full h-full flex ${horizontalAlignment} items-start pt-0 pointer-events-none`}>
       <div ref={pulseRef} className="pointer-events-auto">
         <PulseShell 
           width={variants.width} 

@@ -33,13 +33,22 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'pulse-settings-v1',
-      version: 2,
+      version: 3,
       migrate: (persistedState, version) => {
         const persisted = persistedState as SettingsStore;
-        // Version 1 used 10 px as its default. Move that old default to the new
-        // flush-to-top anchor once; later user-selected offsets remain intact.
-        if (version < 2 && persisted.settings?.topOffset === 10) {
-          return { ...persisted, settings: { ...persisted.settings, topOffset: 0 } };
+        if (version < 3 && persisted.settings) {
+          const oldSettings = persisted.settings as unknown as Record<string, unknown>;
+          let oldOffset = typeof oldSettings.topOffset === 'number' ? oldSettings.topOffset : 10;
+          if (version < 2 && oldOffset === 10) oldOffset = 0;
+          const migratedSettings: Record<string, unknown> = {
+            ...oldSettings,
+            position: { horizontal: 'center', verticalOffset: Math.max(0, Math.min(40, oldOffset)), display: 'active' },
+          };
+          delete migratedSettings.topOffset;
+          return {
+            ...persisted,
+            settings: migratedSettings as unknown as PulseSettings,
+          };
         }
         return persisted;
       },

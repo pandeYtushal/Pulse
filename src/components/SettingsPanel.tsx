@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { motion } from 'framer-motion';
-import { Bell, Cable, RotateCcw, Settings, Shield, X } from 'lucide-react';
+import { Bell, Cable, Monitor, RotateCcw, Settings, Shield, X } from 'lucide-react';
 import { useSettingsStore } from '../settings/store';
 import { usePulseStore } from '../store/pulseStore';
 import type { PulseSettings } from '../settings/types';
+import { PositionControls } from './PositionControls';
 
-type Page = 'general' | 'activity' | 'privacy';
+type Page = 'general' | 'appearance' | 'activity' | 'privacy';
 
 function Toggle({ label, description, checked, onChange }: {
   label: string; description?: string; checked: boolean; onChange: (value: boolean) => void;
@@ -39,6 +40,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
 
   const pages: { id: Page; label: string; icon: typeof Settings }[] = [
     { id: 'general', label: 'General', icon: Settings },
+    { id: 'appearance', label: 'Appearance', icon: Monitor },
     { id: 'activity', label: 'Activity', icon: Cable },
     { id: 'privacy', label: 'Privacy', icon: Shield },
   ];
@@ -52,9 +54,14 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
     <div className="settings-content">
       {page === 'general' && <>
         <Group title="Startup"><Toggle label="Start Pulse with Windows" description="Open Pulse in the background after you sign in." checked={settings.startWithWindows} onChange={setStartup} /></Group>
-        <Group title="Position"><div className="settings-row"><div><div className="settings-label">Top offset</div><div className="settings-description">Distance from the top of the screen</div></div><label className="settings-value"><input aria-label="Top offset" type="number" min={0} max={40} value={settings.topOffset} onChange={(event) => set('topOffset', Math.max(0, Math.min(40, Number(event.target.value) || 0)))} /> px</label></div></Group>
         <Group title="Shortcut"><div className="settings-row"><div><div className="settings-label">Toggle Pulse</div><div className="settings-description">Show or hide the Pulse surface</div></div><kbd>Ctrl&nbsp; + &nbsp;Alt&nbsp; + &nbsp;P</kbd></div></Group>
         <Group title="Reset"><div className="settings-row"><div><div className="settings-label">Restore default settings</div><div className="settings-description">Your onboarding status stays complete.</div></div><button className="settings-reset" onClick={() => setConfirmReset(true)}><RotateCcw size={13} /> Reset</button></div></Group>
+      </>}
+      {page === 'appearance' && <>
+        <Group title="Position"><div className="settings-label">Choose where Pulse appears on your screen.</div>
+          <PositionControls value={settings.position} onChange={position => set('position', position)} />
+          <button className="position-reset" type="button" onClick={() => set('position', { horizontal: 'center', verticalOffset: 10, display: 'active' })}><RotateCcw size={12} /> Reset to default</button>
+        </Group>
       </>}
       {page === 'activity' && <>
         <Group title="Windows activity">

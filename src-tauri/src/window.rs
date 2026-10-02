@@ -1,15 +1,83 @@
-use std::sync::atomic::{AtomicI32, Ordering};
-use std::sync::{Arc, Mutex};
+use serde::{Deserialize, Serialize};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State};
 
 #[cfg(windows)]
 use windows::Win32::Foundation::POINT;
 #[cfg(windows)]
 use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 
-static TOP_OFFSET: AtomicI32 = AtomicI32::new(0);
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PositionConfig {
+    pub horizontal: String,
+    pub vertical_offset: i32,
+    pub display: String,
+}
+
+impl Default for PositionConfig {
+    fn default() -> Self {
+        Self {
+            horizontal: "center".into(),
+            vertical_offset: 10,
+            display: "active".into(),
+        }
+    }
+}
+
+fn position_config() -> &'static Mutex<PositionConfig> {
+    static CONFIG: OnceLock<Mutex<PositionConfig>> = OnceLock::new();
+    CONFIG.get_or_init(|| Mutex::new(PositionConfig::default()))
+}
+
+fn current_position_config() -> PositionConfig {
+    position_config()
+        .lock()
+        .map(|config| config.clone())
+        .unwrap_or_default()
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DisplayInfo {
+    id: String,
+    name: String,
+    primary: bool,
+}
+
+fn display_id(monitor: &tauri::Monitor) -> String {
+    if let Some(name) = monitor.name() {
+        format!("monitor:{name}")
+    } else {
+        let position = monitor.position();
+        format!("monitor:{}:{}", position.x, position.y)
+    }
+}
+
+#[tauri::command]
+pub fn get_displays(window: tauri::WebviewWindow) -> Vec<DisplayInfo> {
+    let primary_id = window
+        .primary_monitor()
+        .ok()
+        .flatten()
+        .as_ref()
+        .map(display_id);
+    window
+        .available_monitors()
+        .unwrap_or_default()
+        .iter()
+        .map(|monitor| DisplayInfo {
+            id: display_id(monitor),
+            name: monitor.name().cloned().unwrap_or_else(|| {
+                let size = monitor.size();
+                format!("Display ({} × {})", size.width, size.height)
+            }),
+            primary: primary_id.as_deref() == Some(display_id(monitor).as_str()),
+        })
+        .collect()
+}
 
 pub struct HitRegion {
     pub width: f64,
@@ -96,38 +164,78 @@ fn active_monitor(window: &tauri::WebviewWindow) -> Option<tauri::Monitor> {
         .or_else(|| window.primary_monitor().ok().flatten())
 }
 
-pub fn position_pulse(window: &tauri::WebviewWindow) {
-    if let Some(monitor) = active_monitor(window) {
-        let scale_factor = monitor.scale_factor();
-        let work_area = monitor.work_area();
-
-        let wa_x = work_area.position.x as f64 / scale_factor;
-        let wa_y = work_area.position.y as f64 / scale_factor;
-        let wa_width = work_area.size.width as f64 / scale_factor;
-        let wa_height = work_area.size.height as f64 / scale_factor;
-        let offset =
-            (TOP_OFFSET.load(Ordering::Acquire).max(0) as f64).min((wa_height - 1.0).max(0.0));
-        let width = wa_width.min(800.0).max(1.0);
-        let height = (wa_height - offset).min(600.0).max(1.0);
-
-        let x = wa_x + (wa_width - width) / 2.0;
-        let y = wa_y + offset;
-
-        let expected_size = (
-            (width * scale_factor).round() as u32,
-            (height * scale_factor).round() as u32,
-        );
-        if let Ok(current_size) = window.inner_size() {
-            if current_size.width != expected_size.0 || current_size.height != expected_size.1 {
-                let _ = window.set_size(LogicalSize::new(width, height));
-            }
-        }
-        let _ = window.set_position(LogicalPosition::new(x, y));
+fn selected_monitor(window: &tauri::WebviewWindow) -> Option<tauri::Monitor> {
+    let config = current_position_config();
+    match config.display.as_str() {
+        "primary" => window.primary_monitor().ok().flatten(),
+        "active" => active_monitor(window),
+        selected => window
+            .available_monitors()
+            .ok()?
+            .into_iter()
+            .find(|monitor| display_id(monitor) == selected)
+            .or_else(|| window.primary_monitor().ok().flatten()),
     }
 }
 
-pub fn set_top_offset(offset: i32) {
-    TOP_OFFSET.store(offset.clamp(0, 40), Ordering::Release);
+pub fn position_pulse(window: &tauri::WebviewWindow) {
+    let config = current_position_config();
+    if let Some(monitor) = selected_monitor(window).or_else(|| active_monitor(window)) {
+        let scale_factor = monitor.scale_factor();
+        let work_area = monitor.work_area();
+
+        let wa_width = work_area.size.width as f64 / scale_factor;
+        let wa_height = work_area.size.height as f64 / scale_factor;
+        let offset = (config.vertical_offset.clamp(0, 40) as f64).min((wa_height - 1.0).max(0.0));
+        let width = wa_width.min(800.0).max(1.0);
+        let height = (wa_height - offset).min(600.0).max(1.0);
+        let physical_width = (width * scale_factor).round().max(1.0) as u32;
+        let physical_height = (height * scale_factor).round().max(1.0) as u32;
+
+        let x = match config.horizontal.as_str() {
+            "left" => work_area.position.x as f64,
+            "right" => {
+                (work_area.position.x + work_area.size.width as i32 - physical_width as i32) as f64
+            }
+            _ => {
+                (work_area.position.x as f64)
+                    + (work_area.size.width as f64 - physical_width as f64) / 2.0
+            }
+        };
+        let y = work_area.position.y as f64 + offset * scale_factor;
+
+        let expected_size = (physical_width, physical_height);
+        if let Ok(current_size) = window.inner_size() {
+            if current_size.width != expected_size.0 || current_size.height != expected_size.1 {
+                let _ = window.set_size(PhysicalSize::new(physical_width, physical_height));
+            }
+        }
+        let _ = window.set_position(PhysicalPosition::new(x.round() as i32, y.round() as i32));
+    }
+}
+
+fn normalize_position_config(mut config: PositionConfig) -> PositionConfig {
+    config.vertical_offset = config.vertical_offset.clamp(0, 40);
+    if !matches!(config.horizontal.as_str(), "left" | "center" | "right") {
+        config.horizontal = "center".into();
+    }
+    if !matches!(config.display.as_str(), "active" | "primary")
+        && !config.display.starts_with("monitor:")
+    {
+        config.display = "active".into();
+    }
+    config
+}
+
+#[tauri::command]
+pub fn set_position_config(app: AppHandle, config: PositionConfig) {
+    let config = normalize_position_config(config);
+    if let Ok(mut current) = position_config().lock() {
+        *current = config;
+    }
+    if let Some(window) = app.get_webview_window("main") {
+        position_pulse(&window);
+    }
 }
 
 pub fn setup_window(app: &AppHandle) {
@@ -200,21 +308,33 @@ pub fn setup_window(app: &AppHandle) {
                             (region.width, region.height, region.retraction_enabled)
                         };
 
-                        let hit_x = wx + (ww / 2.0) - (hw / 2.0);
+                        let horizontal = current_position_config().horizontal;
+                        let hit_x = match horizontal.as_str() {
+                            "left" => wx,
+                            "right" => wx + ww - hw,
+                            _ => wx + (ww / 2.0) - (hw / 2.0),
+                        };
                         let hit_y = wy;
                         let hit_right = hit_x + hw;
                         let hit_bottom = hit_y + hh;
                         let is_inside =
                             mx >= hit_x && mx <= hit_right && my >= hit_y && my <= hit_bottom;
-                        
+
                         let pad_x = 16.0;
                         let pad_y = 12.0;
-                        let cursor_in_pulse = mx >= hit_x - pad_x && mx <= hit_right + pad_x && my >= hit_y - pad_y && my <= hit_bottom + pad_y;
-                        
+                        let cursor_in_pulse = mx >= hit_x - pad_x
+                            && mx <= hit_right + pad_x
+                            && my >= hit_y - pad_y
+                            && my <= hit_bottom + pad_y;
+
                         let trigger_x_min = hit_x - 200.0;
                         let trigger_x_max = hit_right + 200.0;
-                        let cursor_in_trigger_enter = my <= hit_y + RETRACTION_ENTER_DISTANCE && mx >= trigger_x_min && mx <= trigger_x_max;
-                        let cursor_in_trigger_exit = my <= hit_y + RETRACTION_EXIT_DISTANCE && mx >= trigger_x_min && mx <= trigger_x_max;
+                        let cursor_in_trigger_enter = my <= hit_y + RETRACTION_ENTER_DISTANCE
+                            && mx >= trigger_x_min
+                            && mx <= trigger_x_max;
+                        let cursor_in_trigger_exit = my <= hit_y + RETRACTION_EXIT_DISTANCE
+                            && mx >= trigger_x_min
+                            && mx <= trigger_x_max;
 
                         if let Some(is_retracted) = update_retraction_state(
                             &mut retracted,
@@ -275,14 +395,6 @@ pub fn force_position_pulse(app: tauri::AppHandle) {
     }
 }
 
-#[tauri::command]
-pub fn set_top_offset_command(app: tauri::AppHandle, top_offset: i32) {
-    set_top_offset(top_offset);
-    if let Some(window) = app.get_webview_window("main") {
-        position_pulse(&window);
-    }
-}
-
 /// Spawn a background thread that detects display config changes (wake/resolution/DPI)
 /// and repositions Pulse automatically. Runs once per app lifetime.
 pub fn start_display_recovery_loop(app: &AppHandle) {
@@ -296,15 +408,17 @@ pub fn start_display_recovery_loop(app: &AppHandle) {
             let mut last_y: i32 = i32::MIN;
             let mut last_scale: f64 = 0.0;
             let mut last_work_area: Option<(i32, i32, u32, u32)> = None;
+            let mut last_display_id: Option<String> = None;
             while !crate::APP_SHUTTING_DOWN.load(std::sync::atomic::Ordering::Relaxed) {
                 thread::sleep(Duration::from_millis(500));
-                if let Some(monitor) = active_monitor(&win) {
+                if let Some(monitor) = selected_monitor(&win) {
                     let w = monitor.size().width;
                     let h = monitor.size().height;
                     let position = monitor.position();
                     let x = position.x;
                     let y = position.y;
                     let s = monitor.scale_factor();
+                    let selected_id = display_id(&monitor);
                     let area = monitor.work_area();
                     let work_area = Some((
                         area.position.x,
@@ -318,6 +432,7 @@ pub fn start_display_recovery_loop(app: &AppHandle) {
                         || y != last_y
                         || (s - last_scale).abs() > 0.01
                         || work_area != last_work_area
+                        || last_display_id.as_deref() != Some(selected_id.as_str())
                     {
                         #[cfg(debug_assertions)]
                         println!("[Window] active display geometry changed; repositioning Pulse");
@@ -328,6 +443,7 @@ pub fn start_display_recovery_loop(app: &AppHandle) {
                         last_y = y;
                         last_scale = s;
                         last_work_area = work_area;
+                        last_display_id = Some(selected_id);
                     }
                 }
             }
@@ -338,6 +454,32 @@ pub fn start_display_recovery_loop(app: &AppHandle) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn position_preferences_are_bounded_and_keep_a_valid_monitor_choice() {
+        let normalized = normalize_position_config(PositionConfig {
+            horizontal: "diagonal".into(),
+            vertical_offset: 120,
+            display: "monitor:\\\\.\\DISPLAY2".into(),
+        });
+
+        assert_eq!(normalized.horizontal, "center");
+        assert_eq!(normalized.vertical_offset, 40);
+        assert_eq!(normalized.display, "monitor:\\\\.\\DISPLAY2");
+    }
+
+    #[test]
+    fn negative_position_offset_is_clamped_without_changing_alignment() {
+        let normalized = normalize_position_config(PositionConfig {
+            horizontal: "right".into(),
+            vertical_offset: -4,
+            display: "primary".into(),
+        });
+
+        assert_eq!(normalized.horizontal, "right");
+        assert_eq!(normalized.vertical_offset, 0);
+        assert_eq!(normalized.display, "primary");
+    }
 
     #[test]
     fn retraction_uses_debounce_and_separate_exit_threshold() {
@@ -499,9 +641,39 @@ mod tests {
         let mut approach_started = None;
         let mut exit_started = None;
 
-        assert_eq!(update_retraction_state(&mut retracted, &mut approach_started, &mut exit_started, true, true, true, true, started), None);
-        assert_eq!(update_retraction_state(&mut retracted, &mut approach_started, &mut exit_started, true, true, true, true, started + Duration::from_millis(200)), None);
-        assert!(!retracted, "active pointer interaction must outrank proximity retraction");
-        assert!(approach_started.is_none(), "the pending retraction timer must be canceled while interacting");
+        assert_eq!(
+            update_retraction_state(
+                &mut retracted,
+                &mut approach_started,
+                &mut exit_started,
+                true,
+                true,
+                true,
+                true,
+                started
+            ),
+            None
+        );
+        assert_eq!(
+            update_retraction_state(
+                &mut retracted,
+                &mut approach_started,
+                &mut exit_started,
+                true,
+                true,
+                true,
+                true,
+                started + Duration::from_millis(200)
+            ),
+            None
+        );
+        assert!(
+            !retracted,
+            "active pointer interaction must outrank proximity retraction"
+        );
+        assert!(
+            approach_started.is_none(),
+            "the pending retraction timer must be canceled while interacting"
+        );
     }
 }

@@ -31,8 +31,8 @@ if (GITHUB_URL) {
   document.getElementById('repository-status').textContent = 'Source, issues and contribution notes.';
 }
 if (WINDOWS_RELEASE_AVAILABLE) {
-  document.getElementById('release-status').textContent = 'Pulse v1.0.1 is available as a Windows installer.';
-  document.getElementById('download-status').textContent = 'Windows installer · v1.0.1';
+  document.getElementById('release-status').textContent = 'Pulse v1.0.2 is available as a Windows installer.';
+  document.getElementById('download-status').textContent = 'Windows installer · v1.0.2';
 } else {
   document.getElementById('release-status').textContent = 'The Windows installer will be available with the first public release.';
   document.getElementById('download-status').textContent = 'No public installer release yet';

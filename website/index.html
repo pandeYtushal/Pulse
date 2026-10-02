@@ -3,20 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#101112" />
+    <meta name="theme-color" content="#0b0d0c" />
     <meta name="description" content="Pulse is a quiet system layer for Windows. Media, notifications, and system activity in one compact surface." />
     <title>Pulse — A quiet system layer for Windows</title>
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./layout.css" />
-    <style>
-      /* Keep the page readable even when an offline host cannot load the full stylesheet. */
-      html, body { min-height: 100%; }
-      body { margin: 0; color: #e9e9e7; background: #101112; font: 16px/1.5 "Segoe UI", system-ui, sans-serif; }
-      a { color: inherit; }
-      main { display: block; }
-    </style>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <script src="./config.js" defer></script>
     <script src="./main.js" defer></script>
+    <script type="module" src="./motion.js"></script>
   </head>
   <body>
     <header class="topbar">
@@ -30,44 +25,58 @@
       </nav>
       <a class="nav-cta configured-link" data-destination="download" href="#download" aria-disabled="true">Get Pulse <span aria-hidden="true">↗</span></a>
     </header>
+    <div class="scroll-progress" aria-hidden="true"></div>
 
     <main id="top">
       <section class="hero shell">
-        <div class="eyebrow"><span class="eyebrow-dot"></span> MADE FOR WINDOWS</div>
-        <h1>A quiet system layer<br /><span>for Windows.</span></h1>
-        <p class="hero-copy">Media, notifications and system activity in one compact surface. There when you need it, out of the way when you don't.</p>
-        <div class="hero-actions">
-          <a class="button button-primary configured-link" data-destination="download" href="#download" aria-disabled="true">Download for Windows <span aria-hidden="true">↓</span></a>
-          <a class="button button-secondary configured-link" data-destination="github" href="#developers" aria-disabled="true">View on GitHub <span aria-hidden="true">↗</span></a>
+        <div class="hero-content">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> MADE FOR WINDOWS</div>
+          <h1>A quieter way<br /><span>to stay in the flow.</span></h1>
+          <p class="hero-copy">Media, notifications and system activity in one compact surface. There when you need it, out of the way when you don't.</p>
+          <div class="hero-actions">
+            <a class="button button-primary configured-link" data-destination="download" href="#download" aria-disabled="true">Download for Windows <span aria-hidden="true">↓</span></a>
+            <a class="button button-secondary configured-link" data-destination="github" href="#developers" aria-disabled="true">Explore on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+          <p class="hero-status" id="release-status" role="status">Public download is not available yet.</p>
+          <div class="hero-rule"><span>01</span><span>SMALL BY DESIGN</span><span>BUILT FOR WINDOWS</span></div>
         </div>
-        <p class="hero-status" id="release-status" role="status">Public download is not available yet.</p>
-        <div class="hero-rule"><span>01</span><span>SMALL BY DESIGN</span><span>BUILT FOR WINDOWS</span></div>
+        <figure class="hero-visual" aria-label="Illustration of the compact Pulse surface at the top of a desktop">
+          <div class="visual-window">
+            <div class="visual-window-top"><span></span><span></span><span></span><i>DESKTOP</i></div>
+            <div class="visual-screen">
+              <div class="visual-pulse"><span class="visual-pulse-mark"></span><span>Pulse</span></div>
+              <div class="visual-copy"><span>YOUR DESKTOP, IN RHYTHM</span><b>Stay with<br />what matters.</b></div>
+              <div class="visual-capabilities"><span>Media</span><span>Notifications</span><span>System activity</span></div>
+            </div>
+          </div>
+          <figcaption><span>01 — ILLUSTRATIVE VIEW</span><span>A quiet layer for Windows</span></figcaption>
+        </figure>
       </section>
 
-      <section class="experience shell section" id="experience">
-        <div class="section-heading"><div><div class="eyebrow">THE EXPERIENCE</div><h2>One surface.<br />The current moment.</h2></div><p>Pulse keeps system activity close without turning it into another dashboard.</p></div>
+      <section class="experience shell section motion-section" id="experience">
+        <div class="section-heading motion-item"><div><div class="eyebrow">THE EXPERIENCE</div><h2>One surface.<br />The current moment.</h2></div><p>Pulse keeps system activity close without turning it into another dashboard.</p></div>
         <div class="flow" aria-label="Pulse interaction flow">
-          <article class="flow-step"><span class="step-index">01</span><h3>Resting</h3><p>A compact surface sits at the top center of your screen.</p></article>
+          <article class="flow-step motion-item"><span class="step-index">01</span><div class="flow-glyph collapsed-glyph" aria-hidden="true"><span></span><span></span><span></span></div><h3>Resting</h3><p>A compact surface sits at the top center of your screen.</p></article>
           <div class="flow-arrow" aria-hidden="true">→</div>
-          <article class="flow-step"><span class="step-index">02</span><h3>Interact</h3><p>Click Pulse to open the controls for the current activity.</p></article>
+          <article class="flow-step motion-item"><span class="step-index">02</span><div class="flow-glyph expanded-glyph" aria-hidden="true"><span></span><span></span><span></span></div><h3>Interact</h3><p>Click Pulse to open the controls for the current activity.</p></article>
           <div class="flow-arrow" aria-hidden="true">→</div>
-          <article class="flow-step"><span class="step-index">03</span><h3>Return</h3><p>Temporary activity clears back to the latest system state.</p></article>
+          <article class="flow-step motion-item"><span class="step-index">03</span><div class="flow-glyph activity-glyph" aria-hidden="true"><span></span><span></span><span></span></div><h3>Return</h3><p>Temporary activity clears back to the latest system state.</p></article>
         </div>
         <p class="capture-note"><span aria-hidden="true">↗</span> Product screenshots will be added after real release captures are available.</p>
       </section>
 
-      <section class="features shell section" id="features">
+      <section class="features shell section motion-section" id="features">
         <div class="eyebrow">WHAT PULSE CAN SURFACE</div>
         <div class="feature-columns">
-          <article class="feature-column"><span class="column-index">A — EVERYDAY</span><h2>Stay in the flow.</h2><ul><li><span>01</span> Media and playback controls</li><li><span>02</span> Windows notifications</li><li><span>03</span> Clipboard activity</li><li><span>04</span> Browser download progress <small>Extension source available</small></li></ul></article>
-          <article class="feature-column"><span class="column-index">B — SYSTEM</span><h2>Small changes, surfaced.</h2><ul><li><span>01</span> Battery and power activity</li><li><span>02</span> Bluetooth and audio-device connections</li><li><span>03</span> USB connections</li><li><span>04</span> Screenshots saved to Windows</li></ul></article>
+          <article class="feature-column motion-item"><span class="column-index">A — EVERYDAY</span><h2>Stay in the flow.</h2><ul><li><span>01</span> Media and playback controls</li><li><span>02</span> Windows notifications</li><li><span>03</span> Clipboard activity</li><li><span>04</span> Browser download progress <small>Extension source available</small></li></ul></article>
+          <article class="feature-column motion-item"><span class="column-index">B — SYSTEM</span><h2>Small changes, surfaced.</h2><ul><li><span>01</span> Battery and power activity</li><li><span>02</span> Bluetooth and audio-device connections</li><li><span>03</span> USB connections</li><li><span>04</span> Screenshots saved to Windows</li></ul></article>
         </div>
-        <div class="privacy-strip" id="privacy"><div class="privacy-mark" aria-hidden="true">◉</div><div><span class="column-index">C — PRIVACY</span><h2>Windows privacy signals.<br />No camera or mic capture.</h2><p>Pulse reads Windows camera and microphone use status to show an indicator. It does not capture audio or video. Notification previews and clipboard text previews are opt-in.</p></div><a href="./privacy.html">Read privacy notes <span aria-hidden="true">↗</span></a></div>
+        <div class="privacy-strip motion-reveal" id="privacy"><div class="privacy-mark" aria-hidden="true">◉</div><div><span class="column-index">C — PRIVACY</span><h2>Windows privacy signals.<br />No camera or mic capture.</h2><p>Pulse reads Windows camera and microphone use status to show an indicator. It does not capture audio or video. Notification previews and clipboard text previews are opt-in.</p></div><a href="./privacy.html">Read privacy notes <span aria-hidden="true">↗</span></a></div>
       </section>
 
-      <section class="browser-guide shell section" id="browser-setup">
-        <div class="section-heading"><div><div class="eyebrow">OPTIONAL BROWSER BRIDGE</div><h2>Bring browser activity<br />into Pulse.</h2></div><p>Use the extension for download progress and websites that create native browser notifications.</p></div>
-        <div class="browser-steps">
+      <section class="browser-guide shell section motion-section" id="browser-setup">
+        <div class="section-heading motion-reveal"><div><div class="eyebrow">OPTIONAL BROWSER BRIDGE</div><h2>Bring browser activity<br />into Pulse.</h2></div><p>Use the extension for download progress and websites that create native browser notifications.</p></div>
+        <div class="browser-steps motion-reveal">
           <article class="browser-step"><span class="step-index">01 / INSTALL</span><h3>Add the extension</h3><p>Download and extract the ZIP. In Chrome open <code>chrome://extensions</code>, or in Edge open <code>edge://extensions</code>. Turn on Developer mode, choose <strong>Load unpacked</strong>, and select the extracted folder that contains <code>manifest.json</code>.</p><a class="text-link" href="./downloads/PulseBrowserBridge_1.0.0.zip" download>Download extension ZIP <span aria-hidden="true">↓</span></a></article>
           <article class="browser-step"><span class="step-index">02 / PERMISSIONS</span><h3>Allow site notifications</h3><p>For Discord Web, open <a href="https://discord.com/channels/@me" target="_blank" rel="noreferrer">discord.com</a>, use the site controls beside the address bar, and set Notifications to Allow. In Discord, keep the relevant server and channel notifications enabled.</p><p class="browser-limit">Pulse receives only notifications the page sends through the browser Notification API. It does not read Discord chats, unread badges, or Discord’s desktop app.</p></article>
           <article class="browser-step"><span class="step-index">03 / TRY IT</span><h3>See the bridge work</h3><p>Keep Pulse and the browser extension running. When a supported website raises a browser notification, Pulse can show its title and body. Start a browser download to see its filename and progress.</p><p class="browser-limit">The extension is an unpacked source package, not a Chrome Web Store listing. It requests access on all sites to observe notification API calls, plus browser download access.</p></article>
@@ -75,17 +84,17 @@
         <p class="browser-help">Manage site notification permissions in <a href="https://support.google.com/chrome/answer/3220216?hl=en" target="_blank" rel="noreferrer">Chrome Settings → Privacy and security → Site settings → Notifications</a>. Discord’s server notification controls are described in its <a href="https://support.discord.com/hc/en-us/articles/215253258-Notifications-Settings-101" target="_blank" rel="noreferrer">notification settings guide</a>.</p>
       </section>
 
-      <section class="download shell section" id="download">
+      <section class="download shell section motion-reveal" id="download">
         <div class="download-copy"><div class="eyebrow">PULSE FOR WINDOWS</div><h2>Ready for<br />your desktop.</h2><p>Download the Windows installer and follow the setup prompts. You can also inspect the source and release notes on GitHub.</p></div>
         <div class="download-action"><a class="button button-primary configured-link" data-destination="download" href="#download" aria-disabled="true">Download Pulse for Windows <span aria-hidden="true">↓</span></a><div class="download-meta"><span class="status-dot"></span><span id="download-status">Windows installer</span></div><a class="text-link configured-link" data-destination="github" href="#developers" aria-disabled="true">View source on GitHub <span aria-hidden="true">↗</span></a><div class="extension-status">Optional browser extension <span id="extension-status">Unpacked source ZIP · not listed in the Web Store</span><a class="text-link" href="./downloads/PulseBrowserBridge_1.0.0.zip" download>Download extension ZIP <span aria-hidden="true">↓</span></a></div></div>
       </section>
 
-      <section class="install shell section" id="install">
+      <section class="install shell section motion-reveal" id="install">
         <div><div class="eyebrow">GETTING STARTED</div><h2>A short path<br />to Pulse.</h2></div>
         <ol><li><span>01</span>When a public release is available, download and run Pulse-Setup.exe.</li><li><span>02</span>Complete the first-run setup and choose your privacy preferences.</li><li><span>03</span>Pulse appears at the top of your screen. Choose whether it starts with Windows in Settings.</li><li><span>04</span>For browser downloads and web notifications, optionally install the browser bridge above.</li></ol>
       </section>
 
-      <section class="developers shell section" id="developers">
+      <section class="developers shell section motion-reveal" id="developers">
         <div class="eyebrow">FOR DEVELOPERS</div><div class="developer-heading"><h2>Built close<br />to the system.</h2><p>Pulse is a Windows desktop app built with React, Tauri 2, Rust, and native Windows APIs.</p></div>
         <div class="developer-grid"><article><span>01 / REPOSITORY</span><p id="repository-status">Repository URL has not been configured.</p><a class="text-link configured-link" data-destination="github" href="#developers" aria-disabled="true">Open repository <span aria-hidden="true">↗</span></a></article><article><span>02 / DEVELOP</span><code>npm install<br />npm run tauri dev</code></article><article><span>03 / VERIFY</span><code>npm run typecheck<br />npm test<br />npm run build:windows</code></article><article><span>04 / ARCHITECTURE</span><p>React presents state. Tauri connects it to Rust services that observe Windows media, notifications, privacy signals, clipboard, devices and power.</p></article></div>
       </section>

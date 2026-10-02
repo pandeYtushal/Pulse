@@ -5,7 +5,11 @@
 export interface PulseSettings {
   // General
   startWithWindows: boolean;
-  topOffset: number;
+  position: {
+    horizontal: 'left' | 'center' | 'right';
+    verticalOffset: number;
+    display: 'primary' | 'active' | `monitor:${string}`;
+  };
 
   // Notifications
   notificationsEnabled: boolean;
