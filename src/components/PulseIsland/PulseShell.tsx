@@ -60,8 +60,8 @@ export function PulseShell({ children, width, height, borderRadius, onClick, onK
       ],
       scaleY: [0.04, 0.48, 1.012, 1],
       transition: {
-        duration: 0.4,
-        ease: [0.16, 1, 0.3, 1],
+        duration: 0.58,
+        ease: [0.22, 1, 0.36, 1],
         times: [0, 0.3, 0.82, 1],
       },
     });

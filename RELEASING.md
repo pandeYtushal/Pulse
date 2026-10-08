@@ -1,6 +1,6 @@
 # Preparing a Pulse release
 
-The public repository is [pandeYtushal/Pulse](https://github.com/pandeYtushal/Pulse). Version `v1.0.1` is published with the matching `Pulse-Setup.exe` installer and SHA-256 checksum. The ordinary CI workflow checks source pushes; the tagged release workflow builds and publishes Windows releases.
+The public repository is [pandeYtushal/Pulse](https://github.com/pandeYtushal/Pulse). Version tags and application metadata must match. The tagged release workflow builds and publishes a Windows installer plus its SHA-256 checksum.
 
 ## Release checklist
 

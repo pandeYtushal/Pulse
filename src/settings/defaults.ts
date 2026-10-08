@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS: PulseSettings = {
   // Notifications
   notificationsEnabled: true,
   showNotificationPreview: false, // privacy: OFF by default
+  notificationHistory: false, // notification history is opt-in
   notificationDuration: 4500,
 
   // Privacy — conservative defaults

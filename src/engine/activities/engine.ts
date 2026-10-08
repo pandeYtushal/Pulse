@@ -140,11 +140,9 @@ export class ActivityEngine {
       return;
     }
 
-    // Clean up finished activities to prevent memory leaks
+    // Keep a finished activity briefly so its exit animation can complete.
+    // Remove it only if no newer event has updated the same activity meanwhile.
     if (this.isActivityFinished(activity.state)) {
-      // We don't delete immediately in case the presentation layer needs it for a final animation,
-      // but we can mark it for deletion or rely on the presentation layer to clear it from its own queue.
-      // For now, we'll delete it after a small delay.
       const expectedUpdatedAt = activity.updatedAt;
       const timer = setTimeout(() => {
         this.expiryTimers.delete(activity!.id);

@@ -32,7 +32,24 @@ Changes for each release will be documented here. Version 1.0.0 was published wi
 
 - Updated the website and application metadata for the v1.0.2 installer release.
 
-## [Unreleased]
+## [1.0.3] - 2026-10-08
+
+### Added
+
+- Optional local notification history with a 50-entry limit and a clear-history control.
+- A smooth top-edge startup reveal in development and production builds.
+
+### Fixed
+
+- Preserved onboarding completion when settings are restored at startup.
+- Collapsed rapid duplicate USB connection events into one visible activity.
+- Delivered Windows notifications from change events instead of waiting for the next full poll.
+- Prevented the white flash while the transparent Windows window initializes.
+
+### Changed
+
+- Removed the unused Tauri opener integration and obsolete window commands.
+- Updated privacy documentation to describe notification history and local storage.
 
 ### Added
 
@@ -46,3 +63,5 @@ Changes for each release will be documented here. Version 1.0.0 was published wi
 
 - Replaced the development-focused README with user installation, architecture, privacy, and contributor guidance.
 - Documented actual data handling and unpublished extension/release status.
+
+## [Unreleased]

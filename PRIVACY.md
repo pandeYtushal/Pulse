@@ -5,7 +5,7 @@ Pulse reads Windows media, notification, clipboard, device, power, and camera/mi
 ## Notifications
 
 - Notification access uses the Windows UserNotificationListener permission. Pulse continues running if the permission is unavailable.
-- Notification text is held in process memory while it is being displayed or deduplicated. It is not written to Pulse settings or a notification history.
+- Notification text is held in process memory while it is being displayed or deduplicated. Recent history is off by default. When enabled, Pulse stores up to 50 recent entries in WebView local storage on this PC; disabling history clears those entries. If previews are off, history stores the app name and time without notification text.
 - Previews are off by default. A small in-memory fingerprint is used to suppress repeat Windows snapshots; it is not cryptographic and is not persisted.
 - A built-in sensitive-app list hides message bodies even when previews are on.
 - The optional native media diagnostic command writes the current player's title, artist, playback status, and timeline to the process console. Do not share diagnostic output until you have reviewed and redacted it. Normal playback logs do not intentionally print notification content.
@@ -17,7 +17,7 @@ Pulse reads Windows media, notification, clipboard, device, power, and camera/mi
 - Download events contain a basename and progress metadata; they are sent from the optional browser extension to the local bridge.
 - Screenshot detection watches for Windows screenshot filename patterns and reports an activity event; Pulse does not read or upload screenshot image contents.
 - Camera and microphone integration reads Windows privacy-use state only. Pulse does not capture audio or video.
-- Pulse settings, including onboarding completion, are persisted by the WebView using browser local storage. Notification, media, and clipboard contents are not stored there.
+- Pulse settings and onboarding completion are persisted by the WebView using browser local storage. Notification history is stored there only when the user enables it. Media and clipboard contents are not stored there.
 - Pulse has no file-based diagnostic upload or crash-reporting service configured. Console logs are local process output; some diagnostic commands can print media metadata.
 
 Pulse does not send notification or clipboard content to an AI service, analytics provider, or remote server.

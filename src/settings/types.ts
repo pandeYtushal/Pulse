@@ -1,6 +1,5 @@
-// ─── Pulse Settings Schema ────────────────────────────────────────────────────
-// Single source of truth for all user preferences.
-// Never store notification content, media metadata, or any private data here.
+// All persisted Pulse preferences live here. Activity and notification content
+// belong to runtime state, not to the settings record.
 
 export interface PulseSettings {
   // General
@@ -14,6 +13,7 @@ export interface PulseSettings {
   // Notifications
   notificationsEnabled: boolean;
   showNotificationPreview: boolean;
+  notificationHistory: boolean;
   notificationDuration: 3000 | 4500 | 6000; // ms
 
   // Privacy

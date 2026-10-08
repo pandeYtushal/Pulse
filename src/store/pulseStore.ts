@@ -26,6 +26,38 @@ export interface PulseNotification {
   icon?: string;
 }
 
+const NOTIFICATION_HISTORY_KEY = 'pulse-notification-history-v1';
+const MAX_NOTIFICATION_HISTORY = 50;
+
+function readNotificationHistory(): PulseNotification[] {
+  try {
+    const raw = localStorage.getItem(NOTIFICATION_HISTORY_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter((item): item is PulseNotification => {
+      if (typeof item !== 'object' || item === null) return false;
+      const notification = item as Partial<PulseNotification>;
+      return typeof notification.id === 'string'
+        && typeof notification.appName === 'string'
+        && typeof notification.title === 'string'
+        && typeof notification.body === 'string'
+        && typeof notification.timestamp === 'number';
+    }).slice(0, MAX_NOTIFICATION_HISTORY);
+  } catch {
+    // Local storage can be unavailable or contain old/corrupt data.
+    return [];
+  }
+}
+
+function writeNotificationHistory(history: PulseNotification[]) {
+  try {
+    localStorage.setItem(NOTIFICATION_HISTORY_KEY, JSON.stringify(history));
+  } catch (error) {
+    console.warn('[Notification] Could not save local history.', error);
+  }
+}
+
 export interface DownloadItem {
   id: string;
   filename: string;
@@ -77,12 +109,14 @@ interface PulseStore {
   systemActivity: SystemActivityData | null;
   notificationsEnabled: boolean;
   showNotificationContent: boolean;
-  storeNotificationHistory: boolean;
-  sendNotificationToAI: boolean;
+  notificationHistoryEnabled: boolean;
+  notificationHistory: PulseNotification[];
   sensitiveApps: string[];
   privacy: PrivacyState;
   setNotificationsEnabled: (enabled: boolean) => void;
   setShowNotificationContent: (enabled: boolean) => void;
+  setNotificationHistoryEnabled: (enabled: boolean) => void;
+  clearNotificationHistory: () => void;
   setMode: (mode: PulseMode) => void;
   setMedia: (media: MediaState | null) => void;
   setPrivacy: (privacy: PrivacyState) => void;
@@ -121,12 +155,26 @@ export const usePulseStore = create<PulseStore>((set) => {
   systemActivity: null,
   notificationsEnabled: true,
   showNotificationContent: false,
-  storeNotificationHistory: false, // Permanently off for now
-  sendNotificationToAI: false, // Permanently off for now
+  notificationHistoryEnabled: false,
+  notificationHistory: readNotificationHistory(),
   sensitiveApps: ['WhatsApp', 'WhatsApp Beta', 'Telegram', 'Signal', 'Google Pay', 'Paytm', 'Banking', 'Password'],
   privacy: { microphone_active: false, camera_active: false, active_apps: [] },
   setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
-  setShowNotificationContent: (enabled) => set({ showNotificationContent: enabled }),
+  setShowNotificationContent: (enabled) => set((state) => {
+    if (enabled) return { showNotificationContent: true };
+    const notificationHistory = state.notificationHistory.map((item) => ({ ...item, title: 'Notification', body: '', icon: undefined }));
+    writeNotificationHistory(notificationHistory);
+    return { showNotificationContent: false, notificationHistory };
+  }),
+  setNotificationHistoryEnabled: (enabled) => set(() => {
+    if (enabled) return { notificationHistoryEnabled: true };
+    writeNotificationHistory([]);
+    return { notificationHistoryEnabled: false, notificationHistory: [] };
+  }),
+  clearNotificationHistory: () => set(() => {
+    writeNotificationHistory([]);
+    return { notificationHistory: [] };
+  }),
   setMode: (mode) => set({ mode }),
   setPrivacy: (privacy) => set({ privacy }),
   setMedia: (media) => set(() => {
@@ -152,8 +200,24 @@ export const usePulseStore = create<PulseStore>((set) => {
 
     console.log(`[NOTIFICATION]\nreceived id=${safeNotification.id}\nqueue=${nextNotifications.length}`);
 
+    let notificationHistory = state.notificationHistory;
+    if (state.notificationHistoryEnabled) {
+      // History keeps only content allowed by the preview preference. Icons can
+      // contain large image payloads, so history stores text and app metadata only.
+      const historyItem = {
+        ...safeNotification,
+        title: state.showNotificationContent ? safeNotification.title : 'Notification',
+        body: state.showNotificationContent ? safeNotification.body : '',
+        icon: undefined,
+      };
+      notificationHistory = [historyItem, ...notificationHistory.filter(item => item.id !== historyItem.id)]
+        .slice(0, MAX_NOTIFICATION_HISTORY);
+      writeNotificationHistory(notificationHistory);
+    }
+
     return { 
-      notifications: nextNotifications
+      notifications: nextNotifications,
+      notificationHistory,
     };
   }),
   removeNotification: (id) => set((state) => {

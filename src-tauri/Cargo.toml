@@ -1,6 +1,6 @@
 [package]
 name = "pulse"
-version = "1.0.2"
+version = "1.0.3"
 description = "A quiet system layer for Windows, bringing media, notifications, and system activity into one compact surface."
 edition = "2021"
 
@@ -18,10 +18,9 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = ["tray-icon"] }
-tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["net", "time"] }
 base64 = "0.23.1"
 windows = { version = "0.58.0", features = ["Win32_UI_Input_KeyboardAndMouse", "Win32_Foundation", "Win32_Graphics_Gdi", "Foundation"] }
 winreg = "0.56.0"

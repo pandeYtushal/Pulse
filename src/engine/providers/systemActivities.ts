@@ -13,11 +13,13 @@ interface NativeSystemActivity {
 }
 
 export class SystemActivitiesProvider {
+  private static readonly USB_CONNECT_DEBOUNCE_MS = 10_000;
   private listener: Promise<() => void> | null = null;
   private unsubscribeSettings: (() => void) | null = null;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private stopped = true;
   private recentIds = new Set<string>();
+  private lastUsbConnectAt = 0;
 
   start() {
     if (this.listener) return;
@@ -30,9 +32,16 @@ export class SystemActivitiesProvider {
     this.listener = listen<NativeSystemActivity>('system-activity', ({ payload }) => {
       if (this.stopped) return;
       const settings = useSettingsStore.getState().settings;
+      // Windows may report several interface arrivals for one USB device (and
+      // can re-enumerate them in a burst after sleep). Pulse presents a single
+      // generic USB activity, so collapse that burst into one visible event.
+      const now = Date.now();
+      if (payload.kind === 'usb' && payload.action === 'connected'
+        && now - this.lastUsbConnectAt < SystemActivitiesProvider.USB_CONNECT_DEBOUNCE_MS) return;
       if (this.recentIds.has(payload.id)) return;
       if ((payload.kind === 'bluetooth' && !settings.bluetoothActivity) || (payload.kind === 'usb' && !settings.usbActivity) || (payload.kind === 'screenshot' && !settings.screenshotActivity)) return;
       this.recentIds.add(payload.id);
+      if (payload.kind === 'usb' && payload.action === 'connected') this.lastUsbConnectAt = now;
       if (this.recentIds.size > 512) this.recentIds.delete(this.recentIds.values().next().value!);
       const type = payload.kind === 'bluetooth' ? EventType.BLUETOOTH_ACTIVITY : payload.kind === 'usb' ? EventType.USB_ACTIVITY : EventType.SCREENSHOT_ACTIVITY;
       pulseEventBus.emit({
@@ -77,6 +86,7 @@ export class SystemActivitiesProvider {
       if (this.listener === current) this.listener = null;
     }
     this.recentIds.clear();
+    this.lastUsbConnectAt = 0;
   }
 }
 

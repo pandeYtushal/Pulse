@@ -19,13 +19,13 @@
         <h2>Windows activity</h2>
         <p>Pulse reads current media metadata and playback state, Windows notifications (with OS permission), battery/power events, camera and microphone use state, USB/Bluetooth connection events, screenshot filename events, and clipboard change information. It does not capture audio, video, or screenshot image contents.</p>
         <h2>Notifications</h2>
-        <p>Notification text stays in process memory while displayed or deduplicated. It is not written to Pulse settings or notification history. Previews are off by default. A built-in sensitive-app list hides message bodies. The optional media diagnostic command can write the current player title, artist, status, and timeline to the console; review and redact output before sharing.</p>
+        <p>Notification text stays in process memory while displayed or deduplicated. Recent history is off by default. When enabled, Pulse keeps up to 50 recent entries in local storage on this PC; disabling history clears them. With previews off, history shows the app and time but does not store notification text. Previews are off by default, and a built-in sensitive-app list hides message bodies.</p>
         <h2>Clipboard</h2>
         <p>Clipboard changes can be shown as temporary activity. Sanitized text previews are opt-in. Pulse does not keep clipboard history. Preview data stays in memory for the duration of the activity.</p>
         <h2>Downloads and browser notifications</h2>
         <p>The optional, unpublished browser extension has broad page access because it observes page calls to the browser Notification API. It forwards web notification title/body and the page hostname to Pulse over the local loopback bridge. Download events include a file basename and progress metadata. This information is sent to the Pulse process on the same device, not to a remote Pulse server. The local bridge does not authenticate other local processes.</p>
         <h2>Settings and diagnostics</h2>
-        <p>Pulse settings and onboarding completion are persisted by the WebView in local storage. Activity content is not stored there. Pulse has no configured telemetry, crash-report upload, or diagnostic upload service. Local console output may include media metadata when the explicit diagnostic command is used.</p>
+        <p>Pulse settings and onboarding completion are persisted by the WebView in local storage. Notification history is stored there only when enabled. Media and clipboard contents are not stored there. Pulse has no configured telemetry, crash-report upload, or diagnostic upload service. Local console output may include media metadata when the explicit media diagnostic is used.</p>
         <h2>Public release status</h2>
         <p>The source repository and Windows installer are available on GitHub. The installer is currently unsigned. The optional browser bridge is distributed as an unpacked source package and is not listed in the Chrome Web Store.</p>
       </article>

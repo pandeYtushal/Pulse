@@ -3,8 +3,8 @@ import { persist } from 'zustand/middleware';
 import type { PulseSettings } from './types';
 import { DEFAULT_SETTINGS } from './defaults';
 
-// Safety: never write sensitive data into settings.
-// The `notificationHistory` field only records a boolean preference, never content.
+// Settings contain preferences only. Notification history is stored separately
+// and only when the user enables it.
 
 interface SettingsStore {
   settings: PulseSettings;
@@ -56,9 +56,11 @@ export const useSettingsStore = create<SettingsStore>()(
       merge: (persistedState, currentState) => {
         // A first launch has no persisted value yet. Zustand passes `undefined`
         // to merge in that case, so treat it as an empty settings object.
-        const persisted = (persistedState as SettingsStore | undefined)?.settings ?? {};
+        const savedState = (persistedState as Partial<SettingsStore> | undefined) ?? {};
+        const persisted = savedState.settings ?? {};
         return {
           ...currentState,
+          ...savedState,
           isLoaded: true,
           settings: { ...DEFAULT_SETTINGS, ...persisted },
         };

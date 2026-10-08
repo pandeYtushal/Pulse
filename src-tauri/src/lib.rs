@@ -15,7 +15,7 @@ use tauri::{
     Emitter, Manager,
 };
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
-use window::{set_click_through, HitRegion};
+use window::HitRegion;
 
 pub static APP_SHUTTING_DOWN: AtomicBool = AtomicBool::new(false);
 
@@ -79,7 +79,6 @@ fn set_system_activity_options(bluetooth: bool, usb: bool, screenshots: bool) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_autostart::Builder::new()
                 .app_name("Pulse")
@@ -115,8 +114,6 @@ pub fn run() {
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
-            set_click_through,
-            window::resize_window,
             window::set_hit_region,
             window::set_retraction_enabled,
             window::force_position_pulse,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { motion } from 'framer-motion';
-import { Bell, Cable, Monitor, RotateCcw, Settings, Shield, X } from 'lucide-react';
+import { Bell, Cable, Monitor, RotateCcw, Settings, Shield, Trash2, X } from 'lucide-react';
 import { useSettingsStore } from '../settings/store';
 import { usePulseStore } from '../store/pulseStore';
 import type { PulseSettings } from '../settings/types';
@@ -26,6 +26,7 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
 
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { settings, setSetting, resetSettings } = useSettingsStore();
+  const notificationHistory = usePulseStore(state => state.notificationHistory);
   const [page, setPage] = useState<Page>('general');
   const [confirmReset, setConfirmReset] = useState(false);
   const set = <K extends keyof PulseSettings>(key: K, value: PulseSettings[K]) => setSetting(key, value);
@@ -34,6 +35,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
     resetSettings();
     usePulseStore.getState().setNotificationsEnabled(true);
     usePulseStore.getState().setShowNotificationContent(false);
+    usePulseStore.getState().setNotificationHistoryEnabled(false);
     void invoke('enable_autostart').catch((error) => console.warn('[Startup] Could not restore startup registration', error));
     setConfirmReset(false);
   };
@@ -80,10 +82,25 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
       {page === 'privacy' && <>
         <Group title="Notifications"><Toggle label="Show notifications" description="Surface incoming Windows notifications in Pulse." checked={settings.notificationsEnabled} onChange={(v) => { set('notificationsEnabled', v); usePulseStore.getState().setNotificationsEnabled(v); }} />
           <Toggle label="Show notification previews" description="Display notification text. Sensitive app content remains hidden." checked={settings.showNotificationPreview} onChange={(v) => { set('showNotificationPreview', v); usePulseStore.getState().setShowNotificationContent(v); }} />
+          <Toggle label="Keep notification history" description="Save up to 50 recent notifications on this PC. Off by default; turning it off clears the history." checked={settings.notificationHistory} onChange={(v) => { set('notificationHistory', v); usePulseStore.getState().setNotificationHistoryEnabled(v); }} />
           <div className="settings-row"><div><div className="settings-label">Notification display time</div><div className="settings-description">How long a collapsed notification stays visible</div></div><select aria-label="Notification display time" value={settings.notificationDuration} onChange={(e) => set('notificationDuration', Number(e.target.value) as PulseSettings['notificationDuration'])}><option value={3000}>3 seconds</option><option value={4500}>4.5 seconds</option><option value={6000}>6 seconds</option></select></div>
         </Group>
+        {settings.notificationHistory && <Group title={`Recent history (${notificationHistory.length})`}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="settings-description">Stored locally on this PC</span>
+            <button type="button" className="settings-reset" onClick={() => usePulseStore.getState().clearNotificationHistory()} disabled={notificationHistory.length === 0}><Trash2 size={12} /> Clear</button>
+          </div>
+          {notificationHistory.length === 0 ? <p className="settings-description">New notifications will appear here.</p> :
+            <div className="max-h-40 overflow-y-auto rounded-lg border border-white/10 divide-y divide-white/5">
+              {notificationHistory.map(item => <article key={item.id} className="px-3 py-2">
+                <div className="flex items-center justify-between gap-3"><span className="text-[11px] font-medium text-white/80 truncate">{item.appName}</span><time className="text-[10px] text-white/40 shrink-0">{new Date(item.timestamp).toLocaleString()}</time></div>
+                <div className="text-[11px] text-white/60 truncate mt-0.5">{item.title}</div>
+                {item.body && <div className="text-[10px] text-white/40 truncate">{item.body}</div>}
+              </article>)}
+            </div>}
+        </Group>}
         <Group title="Indicators"><Toggle label="Camera and microphone indicator" description="Show a dot when Windows reports either device is in use." checked={settings.cameraMicIndicator} onChange={(v) => set('cameraMicIndicator', v)} /></Group>
-        <p className="settings-note"><Bell size={13} /> Activity is processed locally. Pulse does not keep a notification history.</p>
+        <p className="settings-note"><Bell size={13} /> Notification history stays on this PC and is off until you enable it.</p>
       </>}
     </div>
     {confirmReset && <div className="settings-confirm" role="alertdialog" aria-modal="true" aria-label="Reset settings"><div className="settings-confirm-box"><strong>Reset Pulse settings?</strong><p>This restores default preferences. Onboarding will stay complete.</p><div><button onClick={() => setConfirmReset(false)}>Cancel</button><button className="danger" onClick={reset}>Reset settings</button></div></div></div>}

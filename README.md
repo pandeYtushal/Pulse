@@ -6,7 +6,7 @@
 
 Pulse is a Windows desktop application built with Tauri 2, React, TypeScript, and Rust. The React interface presents the current activity; native Rust services read supported Windows system state and report it to the interface.
 
-Pulse can show Windows media sessions and playback controls, notification activity, optional notification previews, clipboard activity and optional sanitized text previews, power/battery alerts, Bluetooth and USB connection changes, screenshot events, and browser download progress through the optional extension source in `extension/`.
+Pulse can show Windows media sessions and playback controls, notification activity and optional local notification history, optional notification previews, clipboard activity and optional sanitized text previews, power/battery alerts, Bluetooth and USB connection changes, screenshot events, and browser download progress through the optional extension source in `extension/`.
 
 Pulse also reads Windows camera and microphone usage state to display an indicator. It does not capture audio or video. See [PRIVACY.md](PRIVACY.md) for data handling, including the browser extension's access to web notifications.
 

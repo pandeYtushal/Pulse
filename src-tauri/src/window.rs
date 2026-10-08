@@ -364,11 +364,6 @@ pub fn setup_window(app: &AppHandle) {
 }
 
 #[tauri::command]
-pub fn resize_window(_app: tauri::AppHandle, _width: f64, _height: f64) {
-    // Deprecated for dynamic resizing. We keep the window stable at 800x600.
-}
-
-#[tauri::command]
 pub fn set_hit_region(state: State<'_, Arc<Mutex<HitRegion>>>, width: f64, height: f64) {
     if let Ok(mut region) = state.lock() {
         region.width = width;
@@ -381,11 +376,6 @@ pub fn set_retraction_enabled(state: State<'_, Arc<Mutex<HitRegion>>>, enabled: 
     if let Ok(mut region) = state.lock() {
         region.retraction_enabled = enabled;
     }
-}
-
-#[tauri::command]
-pub fn set_click_through(window: tauri::Window, ignore: bool) {
-    let _ = window.set_ignore_cursor_events(ignore);
 }
 
 #[tauri::command]

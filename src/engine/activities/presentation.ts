@@ -58,8 +58,7 @@ class PresentationManager {
     // AMBIENT activities don't change the main content mode.
     if (priority === 'AMBIENT') {
       if (activity.type === ActivityType.PRIVACY) {
-        // Update the ambient privacy indicators in the store
-        // We'll update the store's privacy state
+        // Privacy events update the indicators without replacing the current activity.
         const currentPrivacy = { ...store.privacy };
         if (activity.payload?.camera !== undefined) currentPrivacy.camera_active = activity.payload.camera;
         if (activity.payload?.microphone !== undefined) currentPrivacy.microphone_active = activity.payload.microphone;

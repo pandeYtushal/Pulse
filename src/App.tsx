@@ -16,6 +16,7 @@ function App() {
   const setSetting = useSettingsStore(state => state.setSetting);
   const notificationsEnabled = useSettingsStore(state => state.settings.notificationsEnabled);
   const showNotificationPreview = useSettingsStore(state => state.settings.showNotificationPreview);
+  const notificationHistory = useSettingsStore(state => state.settings.notificationHistory);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [windowShown, setWindowShown] = useState(false);
   const [revealToken, setRevealToken] = useState(0);
@@ -34,7 +35,8 @@ function App() {
     const state = usePulseStore.getState();
     state.setNotificationsEnabled(notificationsEnabled);
     state.setShowNotificationContent(showNotificationPreview);
-  }, [isLoaded, notificationsEnabled, showNotificationPreview]);
+    state.setNotificationHistoryEnabled(notificationHistory);
+  }, [isLoaded, notificationsEnabled, showNotificationPreview, notificationHistory]);
 
   useEffect(() => {
     if (!isLoaded) return;

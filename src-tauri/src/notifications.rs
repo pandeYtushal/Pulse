@@ -18,10 +18,11 @@ pub struct PulseNotification {
 #[cfg(windows)]
 pub mod windows_notifications {
     use super::*;
+    use windows::Foundation::TypedEventHandler;
     use windows::UI::Notifications::Management::{
         UserNotificationListener, UserNotificationListenerAccessStatus,
     };
-    use windows::UI::Notifications::NotificationKinds;
+    use windows::UI::Notifications::{NotificationKinds, UserNotificationChangedEventArgs};
 
     #[tauri::command]
     pub fn check_notification_permission() -> String {
@@ -237,6 +238,96 @@ pub mod windows_notifications {
                         }
                     }
                 }
+
+                // Prefer Windows' notification change event over polling the
+                // entire notification center every second. Keep the existing
+                // snapshot poll as a compatibility fallback if registration is
+                // unavailable for this Windows session.
+                let callback_seen = std::sync::Arc::new(std::sync::Mutex::new(recent_seen.clone()));
+                let callback_app = app_clone.clone();
+                let handler = TypedEventHandler::<
+                    UserNotificationListener,
+                    UserNotificationChangedEventArgs,
+                >::new(move |sender, _args| {
+                    let Some(sender) = sender.as_ref() else {
+                        return Ok(());
+                    };
+                    let Ok(future) = sender.GetNotificationsAsync(NotificationKinds::Toast) else {
+                        return Ok(());
+                    };
+                    let Ok(notifications) = future.get() else {
+                        return Ok(());
+                    };
+                    let mut current_fingerprints = std::collections::HashSet::new();
+                    let mut new_notifications = Vec::new();
+                    let Ok(mut seen) = callback_seen.lock() else {
+                        return Ok(());
+                    };
+
+                    for i in 0..notifications.Size().unwrap_or(0) {
+                        let Ok(notif) = notifications.GetAt(i) else {
+                            continue;
+                        };
+                        let Ok(id) = notif.Id() else { continue };
+                        let app_name = extract_app_name(&notif);
+                        let title = extract_title(&notif);
+                        let body = extract_body(&notif);
+                        let mut hasher = DefaultHasher::new();
+                        id.hash(&mut hasher);
+                        app_name.hash(&mut hasher);
+                        title.hash(&mut hasher);
+                        body.hash(&mut hasher);
+                        let fingerprint = hasher.finish();
+                        current_fingerprints.insert(fingerprint);
+                        if !seen.contains(&fingerprint) {
+                            new_notifications.push(PulseNotification {
+                                id: id.to_string(),
+                                app_name,
+                                title,
+                                body,
+                                timestamp: SystemTime::now()
+                                    .duration_since(UNIX_EPOCH)
+                                    .unwrap_or_default()
+                                    .as_millis() as u64,
+                            });
+                        }
+                    }
+
+                    *seen = current_fingerprints;
+                    drop(seen);
+                    for notification in new_notifications {
+                        // Never log app names, titles, or notification bodies.
+                        let _ = callback_app.emit("pulse://notification", notification);
+                    }
+                    Ok(())
+                });
+
+                if let Ok(event_token) = listener.NotificationChanged(&handler) {
+                    println!("[Notification] change listener ready");
+                    let mut healthy = true;
+                    let mut health_check = 0;
+                    while !crate::APP_SHUTTING_DOWN.load(std::sync::atomic::Ordering::Relaxed) {
+                        thread::sleep(std::time::Duration::from_secs(1));
+                        health_check += 1;
+                        if health_check >= 5 {
+                            health_check = 0;
+                            if listener.GetAccessStatus().is_err() {
+                                healthy = false;
+                                break;
+                            }
+                        }
+                    }
+                    let _ = listener.RemoveNotificationChanged(event_token);
+                    if crate::APP_SHUTTING_DOWN.load(std::sync::atomic::Ordering::Relaxed) {
+                        break;
+                    }
+                    if !healthy {
+                        eprintln!("[Notification] listener lost; retrying");
+                        thread::sleep(std::time::Duration::from_secs(3));
+                        continue;
+                    }
+                }
+                eprintln!("[Notification] change event unavailable; using snapshot fallback");
 
                 let mut consecutive_failures = 0;
                 while !crate::APP_SHUTTING_DOWN.load(std::sync::atomic::Ordering::Relaxed) {
